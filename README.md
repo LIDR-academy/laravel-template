@@ -7,6 +7,55 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Local development (Docker)
+
+This project runs fully in Docker. The only requirements on your machine are
+**Docker** + **Docker Compose** and **GNU Make**.
+
+```bash
+make setup      # first-time: copies .env, builds, starts, installs deps, key, migrates
+```
+
+Then open:
+
+| Service        | URL                          |
+|----------------|------------------------------|
+| Application    | http://localhost:8000        |
+| Vite (HMR)     | http://localhost:5173        |
+| Mailpit (mail) | http://localhost:8025        |
+| pgAdmin (DB)   | http://localhost:5050        |
+
+### Stack
+
+- **app** — PHP 8.4 (php-fpm) with `pdo_pgsql` + `redis` extensions and Composer
+- **nginx** — web server
+- **db** — PostgreSQL 16 (dev DB `laravel`, separate test DB `laravel_test`)
+- **redis** — cache and queues
+- **vite** — Node 24 front-end dev server (hot reload)
+- **mailpit** — catches all outgoing mail (SMTP + web UI)
+- **pgadmin** — PostgreSQL management UI
+
+### Common commands
+
+```bash
+make up         # start everything
+make down       # stop everything
+make logs       # tail logs
+make shell      # bash inside the app container
+make migrate    # run migrations
+make fresh      # drop + re-migrate + seed
+make test       # run the test suite (uses the laravel_test DB — never touches dev data)
+make psql       # open a psql shell
+make artisan ARGS="route:list"
+make composer ARGS="require vendor/pkg"
+make help       # list all commands
+```
+
+> **Port conflicts?** If a default host port is already in use, override it when
+> starting, e.g. `APP_PORT=8001 DB_PORT_HOST=5433 make up`. Configurable vars:
+> `APP_PORT`, `DB_PORT_HOST`, `REDIS_PORT_HOST`, `VITE_PORT`, `MAILPIT_UI_PORT`,
+> `MAILPIT_SMTP_PORT`, `PGADMIN_PORT`.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
