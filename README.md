@@ -7,54 +7,93 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## Local development (Docker)
+## Development environment (Docker)
 
-This project runs fully in Docker. The only requirements on your machine are
-**Docker** + **Docker Compose** and **GNU Make**.
+The project runs entirely in Docker. All you need on your machine is
+**Docker**, **Docker Compose** and **GNU Make**.
 
-```bash
-make setup      # first-time: copies .env, builds, starts, installs deps, key, migrates
-```
-
-Then open:
-
-| Service        | URL                          |
-|----------------|------------------------------|
-| Application    | http://localhost:8000        |
-| Vite (HMR)     | http://localhost:5173        |
-| Mailpit (mail) | http://localhost:8025        |
-| pgAdmin (DB)   | http://localhost:5050        |
-
-### Stack
-
-- **app** — PHP 8.4 (php-fpm) with `pdo_pgsql` + `redis` extensions and Composer
-- **nginx** — web server
-- **db** — PostgreSQL 16 (dev DB `laravel`, separate test DB `laravel_test`)
-- **redis** — cache and queues
-- **vite** — Node 24 front-end dev server (hot reload)
-- **mailpit** — catches all outgoing mail (SMTP + web UI)
-- **pgadmin** — PostgreSQL management UI
-
-### Common commands
+### ⚡ Quick start
 
 ```bash
-make up         # start everything
-make down       # stop everything
-make logs       # tail logs
-make shell      # bash inside the app container
-make migrate    # run migrations
-make fresh      # drop + re-migrate + seed
-make test       # run the test suite (uses the laravel_test DB — never touches dev data)
-make psql       # open a psql shell
-make artisan ARGS="route:list"
-make composer ARGS="require vendor/pkg"
-make help       # list all commands
+make setup
 ```
 
-> **Port conflicts?** If a default host port is already in use, override it when
-> starting, e.g. `APP_PORT=8001 DB_PORT_HOST=5433 make up`. Configurable vars:
+That single command handles the whole initial bootstrap:
+
+1. Creates `.env` from `.env.example` (if it doesn't exist).
+2. Builds the application image.
+3. Starts all containers and waits for them to be healthy.
+4. Installs Composer dependencies.
+5. Generates the `APP_KEY`.
+6. Runs the migrations.
+
+Once it finishes, the services are available at:
+
+| Service         | URL                     |
+|-----------------|-------------------------|
+| Application     | http://localhost:8000   |
+| Vite (HMR)      | http://localhost:5173   |
+| Mailpit (mail)  | http://localhost:8025   |
+| pgAdmin (DB)    | http://localhost:5050   |
+
+> **Stack services:** `app` (PHP 8.4 php-fpm + Composer, with `pdo_pgsql` and
+> `redis`), `nginx`, `db` (PostgreSQL 16 — dev DB `laravel` and a separate test
+> DB `laravel_test`), `redis` (cache and queues), `vite` (Node 24 with hot
+> reload), `mailpit` (mail catcher) and `pgadmin` (DB manager).
+
+> **Port conflict?** If a default port is already in use, override it when
+> starting, e.g. `APP_PORT=8001 DB_PORT_HOST=5433 make up`. Available variables:
 > `APP_PORT`, `DB_PORT_HOST`, `REDIS_PORT_HOST`, `VITE_PORT`, `MAILPIT_UI_PORT`,
 > `MAILPIT_SMTP_PORT`, `PGADMIN_PORT`.
+
+### 🛠️ Make commands
+
+Run `make` or `make help` to see the full list. Summary:
+
+#### Bootstrap
+| Command      | Description                                                |
+|--------------|------------------------------------------------------------|
+| `make setup` | Full initial setup (env, build, up, deps, key, migrate)    |
+
+#### Container lifecycle
+| Command        | Description                                          |
+|----------------|------------------------------------------------------|
+| `make up`      | Start all containers in the background               |
+| `make down`    | Stop and remove the containers                       |
+| `make restart` | Restart all containers                               |
+| `make stop`    | Stop the containers without removing them            |
+| `make build`   | Build the application image                          |
+| `make rebuild` | Rebuild the image from scratch (no cache)            |
+| `make ps`      | Show running containers                              |
+| `make logs`    | Tail logs in real time (CTRL+C to exit)             |
+| `make clean`   | Stop containers and **DELETE** the volumes (data)    |
+
+#### Database
+| Command         | Description                                  |
+|-----------------|----------------------------------------------|
+| `make migrate`  | Run the migrations                           |
+| `make rollback` | Roll back the last migration batch           |
+| `make fresh`    | Drop all tables and re-migrate + seeders     |
+| `make seed`     | Run the seeders                              |
+| `make psql`     | Open a `psql` shell on the dev database      |
+
+#### Development
+| Command                            | Description                                     |
+|------------------------------------|-------------------------------------------------|
+| `make shell`                       | Open a bash shell inside the `app` container    |
+| `make tinker`                      | Open Laravel Tinker                             |
+| `make artisan ARGS="route:list"`   | Run an artisan command                          |
+| `make composer ARGS="require ..."` | Run a composer command                          |
+| `make npm ARGS="install ..."`      | Run an npm command in the `vite` container      |
+| `make fmt`                         | Format the code with Laravel Pint               |
+
+#### Tests
+> They use the `laravel_test` DB, separate from the dev DB — running tests never touches your data.
+
+| Command                             | Description                          |
+|-------------------------------------|--------------------------------------|
+| `make test`                         | Run the test suite (Pest)            |
+| `make test-filter ARGS="UserTest"`  | Run tests matching the filter        |
 
 ## About Laravel
 
