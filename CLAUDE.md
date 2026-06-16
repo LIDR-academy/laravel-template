@@ -1,0 +1,90 @@
+# Blog API — Engineering Rules
+
+This file governs how any agent (and any engineer) works in this repository.
+The prompt you type says **WHAT** to build. This file says **HOW** it must be built.
+If a prompt omits process details, follow this file by default — do not ask.
+
+## Stack
+
+- Laravel 13 · PHP 8.4 · runs in Docker (see `Makefile` / `docker compose`)
+- PostgreSQL (app + `laravel_test` for the test suite) · Redis
+- Auth: Laravel Sanctum (token-based API auth)
+- Tests: Pest 4 · coverage via PCOV — run them in the container:
+  `make test` (suite) · `make test-coverage` (suite + coverage)
+- Style: Laravel Pint — `docker compose exec app ./vendor/bin/pint`
+
+## Architecture (target for every feature)
+
+Keep layers thin and single-purpose. Data flows in one direction:
+
+```
+Route (routes/api.php)
+  → Controller        // thin: no business logic, no validation rules inline
+    → FormRequest      // ALL validation + authorization lives here
+    → Service          // ALL business logic; the only place that mutates state
+      → Eloquent Model // persistence, relationships, scopes
+  → API Resource       // ALL response shaping; never return raw models/arrays
+```
+
+Rules:
+- Controllers never contain validation, query building, or business rules.
+- Services are plain classes under `app/Services`, injected via the container.
+- Every endpoint returns an `App\Http\Resources\*` Resource, never a raw model.
+- Validation + authorization go in `app/Http/Requests/*` FormRequests.
+- Routes are grouped and named in `routes/api.php` (never logic in the route file).
+
+## Testing — TDD is mandatory
+
+Red → Green → Refactor. **Write the failing test first**, always.
+
+- Every test uses the **AAA** structure with explicit comments:
+  ```php
+  it('creates a tag', function () {
+      // Arrange
+      $user = User::factory()->create();
+
+      // Act
+      $response = $this->actingAs($user)->postJson('/api/tags', ['name' => 'Laravel']);
+
+      // Assert
+      $response->assertCreated();
+      expect(Tag::where('name', 'Laravel')->exists())->toBeTrue();
+  });
+  ```
+- Endpoint behavior → **Feature tests** (`tests/Feature`). Services/units → **Unit tests** (`tests/Unit`).
+- Use `RefreshDatabase` and model factories. No fixtures, no hitting real services.
+
+### Coverage is not "tests exist"
+
+A green suite proves nothing about what is NOT tested. For every endpoint, the
+Definition of Done requires the full behavior matrix:
+
+- happy path
+- validation errors (422)
+- auth failure (401)
+- not found (404)
+
+Line coverage must be **≥ 80%** (`make test-coverage`). Treat coverage as a backstop,
+never a substitute for the behavior matrix — high coverage with weak assertions is still
+a gap.
+
+## Git workflow
+
+- Never commit to `main`. Branch first: `feature/<kebab-slug>` or `refactor/<kebab-slug>`.
+- Conventional commits: `feat:`, `refactor:`, `test:`, `fix:`, `chore:`.
+- Run Pint before committing. Tests must be green before every commit.
+- Open the PR as the **final, explicit step** with `gh pr create` (fill title + body).
+
+**Enforced by the pre-commit hook** (`.claude/hooks/guard-tests.php`):
+- `git commit` → blocked unless the suite is **green**.
+- `gh pr create` → blocked unless the suite is green **and coverage ≥ 80%**.
+
+## Definition of Done
+
+1. Failing test written first, then implementation (TDD).
+2. Layers respected (Controller / FormRequest / Service / Resource).
+3. Behavior matrix covered (happy / 422 / 401 / 404); coverage ≥ 80%.
+4. `make test` green · Pint clean.
+5. On a feature/refactor branch, conventional commits, PR opened with `gh pr create`.
+
+For full features, prefer the `/feature` command, which runs this loop end to end.
