@@ -11,6 +11,13 @@ class Post extends Model
 
     protected $guarded = [];
 
+    protected function casts(): array
+    {
+        return [
+            'published' => 'boolean',
+        ];
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
