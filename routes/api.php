@@ -1,10 +1,9 @@
 <?php
 
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
 use App\Models\Category;
-use App\Models\Like;
-use App\Models\Post;
 use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -86,33 +85,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // --- LIKES (toggle = auth) ------------------------------------------
 
-    Route::post('/posts/{id}/like', function (Request $request, $id) {
-        $post = Post::find($id);
-
-        if (! $post) {
-            return response()->json(['message' => 'Post not found'], 404);
-        }
-
-        $existing = Like::where('post_id', $post->id)
-            ->where('user_id', $request->user()->id)
-            ->first();
-
-        if ($existing) {
-            $existing->delete();
-            $liked = false;
-        } else {
-            Like::create([
-                'post_id' => $post->id,
-                'user_id' => $request->user()->id,
-            ]);
-            $liked = true;
-        }
-
-        return response()->json([
-            'liked' => $liked,
-            'likes_count' => Like::where('post_id', $post->id)->count(),
-        ]);
-    });
+    Route::post('/posts/{id}/like', [LikeController::class, 'store'])->name('likes.toggle');
 });
 
 // --- TAGS & CATEGORIES (read only — NO create/update/delete) -------------
