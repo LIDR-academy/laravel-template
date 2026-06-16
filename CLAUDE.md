@@ -43,6 +43,8 @@ Rules:
 - Services are plain classes under `app/Services`, injected via the container.
 - Every endpoint returns an `App\Http\Resources\*` Resource, never a raw model.
 - Validation + authorization go in `app/Http/Requests/*` FormRequests and `app/Policies/*`.
+- Add a Policy ONLY when authorization goes beyond authentication (ownership, roles). Never
+  create always-true policies — `auth:sanctum` already enforces authentication.
 - Routes are grouped and named in `routes/api.php` (never logic in the route file).
 
 ## Scaffold with Artisan — never hand-write boilerplate
@@ -128,6 +130,8 @@ a gap.
 
 - Never commit to `main`. Branch first: `feature/<kebab-slug>` or `refactor/<kebab-slug>`.
 - Conventional commits: `feat:`, `refactor:`, `test:`, `fix:`, `chore:`.
+- Stage only the files you created or changed for this task. NEVER `git add -A` / `git add .`
+  — it sweeps unrelated untracked files into the commit. Add explicit paths.
 - Run Pint before committing. Tests must be green before every commit.
 - Open the PR as the **final, explicit step** with `gh pr create` (fill title + body).
 
