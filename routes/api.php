@@ -3,8 +3,8 @@
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\TagController;
 use App\Models\Category;
-use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -69,13 +69,14 @@ Route::post('/logout', function (Request $request) {
 
 $postMissing = fn () => response()->json(['message' => 'Post not found'], 404);
 $commentMissing = fn () => response()->json(['message' => 'Comment not found'], 404);
+$tagMissing = fn () => response()->json(['message' => 'Tag not found'], 404);
 
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{post}', [PostController::class, 'show'])->missing($postMissing);
 
 // --- POSTS (write = auth) -----------------------------------------------
 
-Route::middleware('auth:sanctum')->group(function () use ($postMissing, $commentMissing) {
+Route::middleware('auth:sanctum')->group(function () use ($postMissing, $commentMissing, $tagMissing) {
 
     Route::post('/posts', [PostController::class, 'store']);
     Route::put('/posts/{post}', [PostController::class, 'update'])->missing($postMissing);
@@ -89,13 +90,18 @@ Route::middleware('auth:sanctum')->group(function () use ($postMissing, $comment
     // --- LIKES (toggle = auth) ------------------------------------------
 
     Route::post('/posts/{post}/like', [LikeController::class, 'toggle'])->missing($postMissing);
+
+    // --- TAGS (create/update/delete = auth) -----------------------------
+
+    Route::post('/tags', [TagController::class, 'store']);
+    Route::put('/tags/{tag}', [TagController::class, 'update'])->missing($tagMissing);
+    Route::delete('/tags/{tag}', [TagController::class, 'destroy'])->missing($tagMissing);
 });
 
-// --- TAGS & CATEGORIES (read only — NO create/update/delete) -------------
+// --- TAGS & CATEGORIES (read = public) -----------------------------------
 
-Route::get('/tags', function () {
-    return Tag::orderBy('name')->get();
-});
+Route::get('/tags', [TagController::class, 'index']);
+Route::get('/tags/{tag}', [TagController::class, 'show'])->missing($tagMissing);
 
 Route::get('/categories', function () {
     return Category::orderBy('name')->get();
