@@ -73,6 +73,20 @@ Red → Green → Refactor. **Write the failing test first**, always.
 - Endpoint behavior → **Feature tests** (`tests/Feature`). Services/units → **Unit tests** (`tests/Unit`).
 - Use `RefreshDatabase` and model factories. No fixtures, no hitting real services.
 
+### Lock the full response contract
+
+When testing an endpoint — especially characterization tests for a refactor — assert the
+COMPLETE response shape, not just a status code and one field:
+
+- Assert EVERY key the endpoint returns with `assertJsonStructure([...])` (including nested
+  relations and counts), so a Resource that drops or renames a field fails the test.
+- Assert values for stable fields (ids, titles, flags) and their TYPE where it matters
+  (e.g. `published` must be a boolean), plus DB side effects.
+- A single `assertJsonFragment(['title' => ...])` is NOT enough — coverage % does not catch
+  a shape regression; only assertions do.
+- Avoid `assertExactJson` when the payload has timestamps or random ids (brittle); assert
+  the key set + stable values instead.
+
 ### Coverage is not "tests exist"
 
 A green suite proves nothing about what is NOT tested. For every endpoint, the
