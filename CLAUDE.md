@@ -4,6 +4,18 @@ This file governs how any agent (and any engineer) works in this repository.
 The prompt you type says **WHAT** to build. This file says **HOW** it must be built.
 If a prompt omits process details, follow this file by default — do not ask.
 
+## Get your own context first
+
+Do not rely on the prompt to hand you context — gather it yourself before writing anything:
+
+- Read the impacted code first: the routes, the model(s) and their migrations, and the
+  nearest existing feature already built in the target architecture.
+- Derive the schema, validation, auth boundaries, response shape and current behavior from
+  what you read. Do not ask and do not assume — go look.
+- Mirror the conventions of the nearest existing feature; new code must be structurally
+  indistinguishable from what is already there.
+- Touch ONLY the resource/endpoints named in the task. Leave everything else unchanged.
+
 ## Stack
 
 - Laravel 13 · PHP 8.4 · runs in Docker (see `Makefile` / `docker compose`)
@@ -86,6 +98,17 @@ COMPLETE response shape, not just a status code and one field:
   a shape regression; only assertions do.
 - Avoid `assertExactJson` when the payload has timestamps or random ids (brittle); assert
   the key set + stable values instead.
+
+### Refactoring locks behavior first
+
+When the task is to refactor existing behavior:
+
+1. FIRST write characterization tests that lock the CURRENT observable behavior (the full
+   contract — see above) and run them green.
+2. THEN restructure into the target architecture, keeping every test green at each step.
+
+Refactoring never changes behavior. A behavior change is a separate feature with its own test
+(e.g. introducing roles, or tightening who may create a resource).
 
 ### Coverage is not "tests exist"
 
