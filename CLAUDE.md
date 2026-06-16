@@ -30,8 +30,27 @@ Rules:
 - Controllers never contain validation, query building, or business rules.
 - Services are plain classes under `app/Services`, injected via the container.
 - Every endpoint returns an `App\Http\Resources\*` Resource, never a raw model.
-- Validation + authorization go in `app/Http/Requests/*` FormRequests.
+- Validation + authorization go in `app/Http/Requests/*` FormRequests and `app/Policies/*`.
 - Routes are grouped and named in `routes/api.php` (never logic in the route file).
+
+## Scaffold with Artisan — never hand-write boilerplate
+
+Always generate framework artifacts with Artisan, run inside the container:
+
+```
+docker compose exec app php artisan make:controller PostController --api
+docker compose exec app php artisan make:request StorePostRequest
+docker compose exec app php artisan make:resource PostResource
+docker compose exec app php artisan make:policy PostPolicy --model=Post
+docker compose exec app php artisan make:model Tag -mf        # model + migration + factory
+docker compose exec app php artisan make:test TagApiTest --pest
+```
+
+Why: the **installed framework version is the source of truth**. Artisan stubs match this
+version's conventions and signatures, so we never ship outdated or incompatible patterns
+from memory. Hand-written boilerplate drifts from the framework — let the CLI generate the
+skeleton, then fill in the logic. (The Angular frontend follows the same rule with
+`ng generate`.)
 
 ## Testing — TDD is mandatory
 
