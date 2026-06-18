@@ -27,6 +27,9 @@ RUN apk add --no-cache \
     # Redis extension (phpredis) via PECL.
     && pecl install redis \
     && docker-php-ext-enable redis \
+    # PCOV extension (fast, coverage-only) via PECL.
+    && pecl install pcov \
+    && docker-php-ext-enable pcov \
     # Clean up build deps to keep the image small.
     && apk del $PHPIZE_DEPS
 
