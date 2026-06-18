@@ -1,10 +1,10 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\TagController;
-use App\Models\Category;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -70,13 +70,14 @@ Route::post('/logout', function (Request $request) {
 $postMissing = fn () => response()->json(['message' => 'Post not found'], 404);
 $commentMissing = fn () => response()->json(['message' => 'Comment not found'], 404);
 $tagMissing = fn () => response()->json(['message' => 'Tag not found'], 404);
+$categoryMissing = fn () => response()->json(['message' => 'Category not found'], 404);
 
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{post}', [PostController::class, 'show'])->missing($postMissing);
 
 // --- POSTS (write = auth) -----------------------------------------------
 
-Route::middleware('auth:sanctum')->group(function () use ($postMissing, $commentMissing, $tagMissing) {
+Route::middleware('auth:sanctum')->group(function () use ($postMissing, $commentMissing, $tagMissing, $categoryMissing) {
 
     Route::post('/posts', [PostController::class, 'store']);
     Route::put('/posts/{post}', [PostController::class, 'update'])->missing($postMissing);
@@ -96,6 +97,12 @@ Route::middleware('auth:sanctum')->group(function () use ($postMissing, $comment
     Route::post('/tags', [TagController::class, 'store']);
     Route::put('/tags/{tag}', [TagController::class, 'update'])->missing($tagMissing);
     Route::delete('/tags/{tag}', [TagController::class, 'destroy'])->missing($tagMissing);
+
+    // --- CATEGORIES (create/update/delete = auth) -----------------------
+
+    Route::post('/categories', [CategoryController::class, 'store']);
+    Route::put('/categories/{category}', [CategoryController::class, 'update'])->missing($categoryMissing);
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->missing($categoryMissing);
 });
 
 // --- TAGS & CATEGORIES (read = public) -----------------------------------
@@ -103,8 +110,7 @@ Route::middleware('auth:sanctum')->group(function () use ($postMissing, $comment
 Route::get('/tags', [TagController::class, 'index']);
 Route::get('/tags/{tag}', [TagController::class, 'show'])->missing($tagMissing);
 
-Route::get('/categories', function () {
-    return Category::orderBy('name')->get();
-});
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/categories/{category}', [CategoryController::class, 'show'])->missing($categoryMissing);
 
 Route::get('/posts/{post}/comments', [CommentController::class, 'index'])->missing($postMissing);
