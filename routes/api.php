@@ -1,8 +1,8 @@
 <?php
 
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostController;
 use App\Models\Category;
-use App\Models\Comment;
 use App\Models\Like;
 use App\Models\Post;
 use App\Models\Tag;
@@ -71,13 +71,17 @@ Route::post('/logout', function (Request $request) {
 // original `{"message":"Post not found"}` 404 contract.
 
 $postMissing = fn () => response()->json(['message' => 'Post not found'], 404);
+$commentMissing = fn () => response()->json(['message' => 'Comment not found'], 404);
 
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{post}', [PostController::class, 'show'])->missing($postMissing);
 
+// Public: a post's comments, newest first.
+Route::get('/posts/{post}/comments', [CommentController::class, 'index'])->missing($postMissing);
+
 // --- POSTS (write = auth) -----------------------------------------------
 
-Route::middleware('auth:sanctum')->group(function () use ($postMissing) {
+Route::middleware('auth:sanctum')->group(function () use ($postMissing, $commentMissing) {
 
     Route::post('/posts', [PostController::class, 'store']);
     Route::put('/posts/{post}', [PostController::class, 'update'])->missing($postMissing);
@@ -85,42 +89,8 @@ Route::middleware('auth:sanctum')->group(function () use ($postMissing) {
 
     // --- COMMENTS (create/delete = auth) --------------------------------
 
-    Route::post('/posts/{id}/comments', function (Request $request, $id) {
-        $post = Post::find($id);
-
-        if (! $post) {
-            return response()->json(['message' => 'Post not found'], 404);
-        }
-
-        $request->validate([
-            'body' => 'required|string|max:2000',
-        ]);
-
-        $comment = new Comment;
-        $comment->post_id = $post->id;
-        $comment->user_id = $request->user()->id;
-        $comment->body = $request->body;
-        $comment->save();
-
-        return response()->json($comment->load('user'), 201);
-    });
-
-    Route::delete('/comments/{id}', function (Request $request, $id) {
-        $comment = Comment::find($id);
-
-        if (! $comment) {
-            return response()->json(['message' => 'Comment not found'], 404);
-        }
-
-        // author of the comment can delete it
-        if ($comment->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Forbidden'], 403);
-        }
-
-        $comment->delete();
-
-        return response()->json(['message' => 'deleted']);
-    });
+    Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->missing($postMissing);
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->missing($commentMissing);
 
     // --- LIKES (toggle = auth) ------------------------------------------
 
@@ -161,14 +131,4 @@ Route::get('/tags', function () {
 
 Route::get('/categories', function () {
     return Category::orderBy('name')->get();
-});
-
-Route::get('/posts/{id}/comments', function ($id) {
-    $post = Post::find($id);
-
-    if (! $post) {
-        return response()->json(['message' => 'Post not found'], 404);
-    }
-
-    return $post->comments()->with('user')->orderByDesc('id')->get();
 });
