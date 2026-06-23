@@ -139,6 +139,9 @@ fmt: ## Format code with Laravel Pint
 test: ## Run the test suite (Pest)
 	$(APP) php artisan test
 
+test-coverage: ## Run the test suite (Pest) with coverage, enforcing an 80% floor
+	$(APP) php artisan test --coverage --min=80
+
 .PHONY: test-filter
 test-filter: ## Run tests matching a filter, e.g. `make test-filter ARGS="UserTest"`
 	$(APP) php artisan test --filter=$(ARGS)
