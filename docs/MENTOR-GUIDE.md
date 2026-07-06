@@ -58,6 +58,7 @@ CLAUDE.md                         reglas durables (arquitectura, TDD/AAA, cobert
 .claude/hooks/guard-tests.php      hook: commit→verde, PR→cobertura ≥80% (corre tests en Docker)
 .claude/settings.json             wiring del hook
 docs/presentations/
+  ├── session-0-harness-engineering.md  deck troncal conceptual (harness engineering: anillos, guides/sensors)
   ├── session-1-refactor.md        contenido slide-by-slide S1 (pásalo a Claude Code web → PPTX)
   └── session-2-greenfield.md      contenido slide-by-slide S2
 docs/prompts/   (los setup-* y ejemplos están en claude-setup; los de build solo en mentor)

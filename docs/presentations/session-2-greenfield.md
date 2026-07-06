@@ -9,8 +9,8 @@
 ## Slide 1 — Title
 - **Building New Endpoints with TDD**
 - Tags & Categories CRUD, designed test-first
-- The **same lazy-proof governance** from Session 1 — now proving itself on new code
-- Speaker notes: Last time we made messy code safe and toured the governance. Today is the second proof: the exact same `CLAUDE.md` + `/feature` + hook, applied to creation instead of refactoring, from one-line prompts. If it carries both, it carries anything.
+- The **same user harness** from Session 1 — now proving itself on new code
+- Speaker notes: Last time we made messy code safe and toured the user harness. Today is the second proof: the exact same guides (`CLAUDE.md`) + ritual (`/feature`) + sensor (hook), applied to creation instead of refactoring, from one-line prompts. If the harness carries both, it carries anything.
 
 ## Slide 2 — Agenda
 - Part 1 — Theory (~30 min): greenfield vs brownfield, test-first design, API contract, outside-in TDD
@@ -66,11 +66,11 @@
 - Consistency comes for free because the architecture is fixed
 - Speaker notes: This is the payoff of S1's discipline: the second resource is almost mechanical. Predictable structure → predictable velocity.
 
-## Slide 11 — Governance recap
-- Short prompt = WHAT; CLAUDE.md = HOW; `/feature` = the ritual; hook = enforcement
-- The agent writes the failing test first because it's *required to*, not asked to
-- The coverage gate (commit → green, PR → ≥ 80%) makes "we have tests" trustworthy
-- Speaker notes: Same meta-lesson as S1, now applied to creation rather than refactoring. The config is the constant across both kinds of work — and the same gate that exposed the false positive in S1 now keeps our brand-new endpoints honest.
+## Slide 11 — Harness recap: guides + sensors
+- Short prompt = WHAT; `CLAUDE.md` guides = HOW; `/feature` = the ritual; hook = the sensor
+- **Inferential guides** (feedforward) make it write the failing test first because it's *required to*, not asked to
+- **Computational sensor** (feedback): the coverage gate (commit → green, PR → ≥ 80%) makes "we have tests" trustworthy
+- Speaker notes: Same user harness as S1, now applied to creation rather than refactoring — the markdown lifts, the hooks enforce. The harness is the constant across both kinds of work, and the same computational sensor that exposed the false positive in S1 now keeps our brand-new endpoints honest.
 
 ## Slide 12 — Demo plan
 - 1) `/feature` for Tags → first failing Feature test (AAA)

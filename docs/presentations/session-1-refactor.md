@@ -27,7 +27,8 @@
 - Move the rigor into **config**, not prompts
 - The prompt says **WHAT**; `CLAUDE.md` + tooling say **HOW**
 - Result: short prompts, reproducible quality — **lazy-proof**
-- Speaker notes: This is the whole talk in one line. Everything else is evidence. By the end you'll have prompts to set this up in your own repo.
+- This has a name: **user-harness engineering** — configuring the outer ring on top of the tool (Session 0)
+- Speaker notes: This is the whole talk in one line. Everything else is evidence. In Session 0's vocabulary: we're engineering the user harness — the outer ring — not writing better prompts. By the end you'll have prompts to set this up in your own repo.
 
 ## Slide 5 — The starting point
 - A legacy blog API: **all logic inline in `routes/api.php`** (fat closures, raw models)
@@ -57,18 +58,18 @@
 - Thin, single-purpose layers; authorization in Policies; responses via Resources
 - Speaker notes: This is the shape every refactor and every new endpoint converges to — because the governance demands it, not because the prompt asked.
 
-## Slide 10 — The governance, rule by rule (CLAUDE.md)
+## Slide 10 — The user harness, rule by rule — inferential guides (CLAUDE.md)
 - **Get your own context first** — read impacted code, mirror patterns, scope to the task
 - **Lock the full contract** — assert the whole response shape + types, not one field
 - **Refactoring locks behavior first**; coverage ≥ 80% backstop
 - **Scaffold via the framework CLI**; **policies only beyond auth**; **stage explicit paths, never `git add -A`**
-- Speaker notes: This is the heart of the session. Walk each rule and say WHY it exists — most were added because a real run went slightly wrong without them. The CLI rule keeps stubs matching the installed framework version, not the model's training data.
+- Speaker notes: These rules are **inferential guides** (feedforward): prose that raises the probability of the right output before the agent acts. The heart of the session — walk each rule and say WHY it exists; most were added because a real run went slightly wrong without them. (The CLI rule is a **computational guide** — stubs matching the installed framework version, not the model's training data.)
 
-## Slide 11 — Three layers of governance
-- `CLAUDE.md` → the rules (**persuades**)
+## Slide 11 — Guides + sensors: the two directions
+- `CLAUDE.md` rules → **inferential guides** (feedforward) — raise the probability; **persuade**
 - `/feature` command → the repeatable ritual (branch → red → green → refactor → commit → PR)
-- PreToolUse **hook** → **enforces**: commit needs green; PR needs coverage ≥ 80%
-- Speaker notes: The distinction seniors love: guidance persuades, the hook guarantees. CLAUDE.md can be ignored by a model; the hook cannot — it blocks the tool call.
+- PreToolUse **hook** → **computational sensor** (feedback) — the deterministic part: commit needs green; PR needs coverage ≥ 80%
+- Speaker notes: This is Böckeler's matrix in action (Session 0). The line seniors love: **the markdown lifts; the hooks enforce**. The rules are inferential — they raise probability, they don't guarantee; determinism enters through the computational sensor. `CLAUDE.md` can be ignored by a model; the hook cannot — it blocks the tool call. You need both directions.
 
 ## Slide 11b — Why the prompt is short
 - Prompt = `Refactor the Posts endpoints into the target architecture.`
